@@ -2,15 +2,25 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from articles.models import Article
+from articles.serializers import ArticleSerializer, ArticleCustomListSerializer
 
 # Create your views here.
 
+# 1. 전체 리스트
 class ArticleView(APIView):
     def get(self, request):
-        pass
+        articles = Article.objects.all()
+        serializer = ArticleSerializer(articles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        pass
+        serializer = ArticleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message":"작성 완료"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message":f"{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ArticleDetailView(APIView):
